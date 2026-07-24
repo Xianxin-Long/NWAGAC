@@ -1,0 +1,12 @@
+/build/
+/build-*/
+/.cache/
+compile_commands.json
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+affine-align
+affine-align-tests
+.DS_Store
