@@ -14,9 +14,9 @@ rebuilt as a tested command-line tool and reusable C library.
 
 ## Highlights
 
-- Exact global alignment in \(O(mn)\) time
-- Affine gap model \(g(k)=\sigma+(k-1)\varepsilon\)
-- Packed one-byte-per-cell traceback with \(O(n)\) score storage
+- Exact global alignment in $O(mn)$ time
+- Affine gap model $g(k)=\sigma+(k-1)\varepsilon$
+- Packed one-byte-per-cell traceback with $O(n)$ score storage
 - Direct sequence input or two-record FASTA input
 - Deterministic traceback without floating-point equality checks
 - Text and machine-readable JSON output
@@ -92,7 +92,7 @@ subtracted internally:
 
 - match: `+match`
 - mismatch: `-mismatch`
-- gap of length \(k\): `-(gap_open + (k - 1) * gap_extend)`
+- gap of length $k$: `-(gap_open + (k - 1) * gap_extend)`
 
 Thus a one-character gap pays the gap-open penalty exactly once. See
 [the algorithm note](docs/algorithm.md) for the recurrences, initialization,
