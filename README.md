@@ -8,18 +8,20 @@ The program aligns two nucleotide or protein sequences, reports the optimal alig
 
 The implementation uses three dynamic-programming matrices to distinguish matches/mismatches from gaps in either sequence.
 
-For a gap of length \(k\), the penalty is
+For a gap of length $k$, the penalty is
 
-\[
-g(k) = o + (k - 1)e,
-\]
+$$
+g(k) = o + (k - 1)e.
+$$
 
 where:
 
-- \(o\) is the gap-opening penalty;
-- \(e\) is the gap-extension penalty.
+- $o$ is the gap-opening penalty;
+- $e$ is the gap-extension penalty.
 
 The algorithm performs global alignment, so both sequences are aligned from beginning to end.
+
+For input sequences of lengths $m$ and $n$, each dynamic-programming matrix has dimensions $(m+1) \times (n+1)$. The algorithm therefore runs in $O(mn)$ time and uses $O(mn)$ memory.
 
 ## Requirements
 
@@ -83,7 +85,7 @@ The exact date line is generated when the program runs.
 
 ## Notes
 
-The dynamic-programming matrices require \(O(mn)\) memory for sequences of lengths \(m\) and \(n\). In the current implementation the matrices are allocated on the stack, so the program is intended for short to moderate sequence lengths.
+The current implementation allocates the three dynamic-programming matrices on the stack. Although the theoretical memory complexity is $O(mn)$, very long input sequences can exceed the available stack size, so the program is intended for short to moderate sequence lengths.
 
 ## License
 
