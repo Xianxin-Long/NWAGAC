@@ -1,6 +1,8 @@
-# Affine Gap Aligner
+# NWAGAC
 
-A small command-line program written in C for global pairwise sequence alignment using the Needleman-Wunsch algorithm with an affine gap penalty.
+**NWAGAC** stands for **Needleman-Wunsch Affine Gap Aligner in C**.
+
+NWAGAC is a small command-line program written in C for global pairwise sequence alignment using the Needleman-Wunsch algorithm with an affine gap penalty.
 
 The program aligns two nucleotide or protein sequences, reports the optimal alignment score, alignment length, number of identities, and number of gap positions, and prints the aligned sequences.
 
@@ -86,6 +88,11 @@ The exact date line is generated when the program runs.
 ## Notes
 
 The current implementation allocates the three dynamic-programming matrices on the stack. Although the theoretical memory complexity is $O(mn)$, very long input sequences can exceed the available stack size, so the program is intended for short to moderate sequence lengths.
+
+## References
+
+1. Compeau, P., & Pevzner, P. A. (2018). *Bioinformatics Algorithms: An Active Learning Approach* (3rd ed.). Active Learning Publishers.
+2. Durbin, R., Eddy, S. R., Krogh, A., & Mitchison, G. (1998). *Biological Sequence Analysis: Probabilistic Models of Proteins and Nucleic Acids*. Cambridge University Press.
 
 ## License
 
