@@ -1,147 +1,90 @@
-# affine-gap-aligner
+# Affine Gap Aligner
 
-[![CI](https://github.com/Xianxin-Long/affine-gap-aligner/actions/workflows/ci.yml/badge.svg)](https://github.com/Xianxin-Long/affine-gap-aligner/actions/workflows/ci.yml)
-[![C11](https://img.shields.io/badge/C-11-blue.svg)](https://en.cppreference.com/w/c/11)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+A small command-line program written in C for global pairwise sequence alignment using the Needleman-Wunsch algorithm with an affine gap penalty.
 
-An exact pairwise global sequence aligner written in C11. It implements a
-Gotoh-style three-state dynamic program for affine gap penalties, reconstructs
-the optimal alignment, and reports alignment statistics through human-readable
-or JSON output.
+The program aligns two nucleotide or protein sequences, reports the optimal alignment score, alignment length, number of identities, and number of gap positions, and prints the aligned sequences.
 
-This project began as a dynamic-programming course implementation and was
-rebuilt as a tested command-line tool and reusable C library.
+## Algorithm
 
-## Highlights
+The implementation uses three dynamic-programming matrices to distinguish matches/mismatches from gaps in either sequence.
 
-- Exact global alignment in $O(mn)$ time
-- Affine gap model $g(k)=\sigma+(k-1)\varepsilon$
-- Packed one-byte-per-cell traceback with $O(n)$ score storage
-- Direct sequence input or two-record FASTA input
-- Deterministic traceback without floating-point equality checks
-- Text and machine-readable JSON output
-- CTest suite, strict compiler warnings, AddressSanitizer/UBSan, and
-  Linux/macOS continuous integration
+For a gap of length \(k\), the penalty is
+
+\[
+g(k) = o + (k - 1)e,
+\]
+
+where:
+
+- \(o\) is the gap-opening penalty;
+- \(e\) is the gap-extension penalty.
+
+The algorithm performs global alignment, so both sequences are aligned from beginning to end.
+
+## Requirements
+
+- A C11-compatible compiler such as GCC or Clang
+- A POSIX-like environment providing `getopt`
 
 ## Build
 
-Requirements: a C11 compiler and CMake 3.16 or newer.
+Compile the program with GCC:
 
 ```bash
-git clone https://github.com/Xianxin-Long/affine-gap-aligner.git
-cd affine-gap-aligner
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-ctest --test-dir build --output-on-failure
+gcc -std=c11 -O2 -Wall -Wextra -Wpedantic needle.c -o needle
 ```
 
-The executable is written to `build/affine-align`.
-
-A Makefile is also provided:
+## Usage
 
 ```bash
-make
-make test
+./needle -a <seq1> -b <seq2> -m <match_score> -M <mismatch_penalty> -o <gap_open> -e <gap_extend>
 ```
 
-## Quick start
+All six arguments are required.
 
-Align two sequences supplied on the command line:
+| Option | Description |
+| --- | --- |
+| `-a` | First sequence |
+| `-b` | Second sequence |
+| `-m` | Match score |
+| `-M` | Mismatch penalty |
+| `-o` | Gap-opening penalty |
+| `-e` | Gap-extension penalty |
+| `-h` | Show help |
+
+Sequence input is case-insensitive and is converted to uppercase before alignment.
+
+## Example
 
 ```bash
-./build/affine-align \
-  --seq-a GATTACA \
-  --seq-b GCATGCU \
-  --match 2 \
-  --mismatch 2 \
-  --gap-open 2 \
-  --gap-extend 1
+./needle -a ATGC -b ATCG -m 2 -M 1 -o 1 -e 0.5
 ```
+
+Example output:
 
 ```text
-Affine Global Alignment
-=======================
-Score          : 0
-Aligned length : 8
-Identity       : 4/8 (50.0%)
-Mismatches     : 2
-Gap characters : 2
-Gap openings   : 2
-
-SeqA      1  G-ATTACA  7
-             | | |.|.
-SeqB      1  GCA-TGCU  7
+########################################
+# Program: needle
+# ...
+########################################
+#=======================================
+# Length: 4
+# Identity: 2
+# Gaps: 0
+# Score: 2.0
+#=======================================
+Alignments:
+SeqA  1  ATGC  4
+         ||  
+SeqB  1  ATCG  4
 ```
 
-Or read exactly two records from a FASTA file:
+The exact date line is generated when the program runs.
 
-```bash
-./build/affine-align --fasta examples/pair.fasta
-```
+## Notes
 
-Use `--format json` for structured output:
-
-```bash
-./build/affine-align --fasta examples/pair.fasta --format json
-```
-
-## Scoring convention
-
-Scores are maximized. Penalties are passed as non-negative magnitudes and are
-subtracted internally:
-
-- match: `+match`
-- mismatch: `-mismatch`
-- gap of length $k$: `-(gap_open + (k - 1) * gap_extend)`
-
-Thus a one-character gap pays the gap-open penalty exactly once. See
-[the algorithm note](docs/algorithm.md) for the recurrences, initialization,
-traceback representation, complexity analysis, and correctness sketch.
-
-## Command-line interface
-
-```text
-Usage:
-  affine-align --seq-a SEQUENCE --seq-b SEQUENCE [options]
-  affine-align --fasta FILE [options]
-
-Input:
-  -a, --seq-a SEQUENCE       First sequence
-  -b, --seq-b SEQUENCE       Second sequence
-  -f, --fasta FILE           FASTA file containing exactly two records
-
-Scoring:
-  -m, --match VALUE          Match score (default: 2)
-  -x, -M, --mismatch VALUE   Mismatch penalty (default: 1)
-  -o, --gap-open VALUE       Gap-open penalty (default: 3)
-  -e, --gap-extend VALUE     Gap-extension penalty (default: 1)
-
-Output:
-      --format text|json     Output format (default: text)
-  -w, --width INTEGER        Alignment columns per block (default: 60)
-```
-
-Input symbols are normalized to uppercase. The CLI accepts alphabetic IUPAC
-symbols, so it can handle nucleotide and protein sequences, including
-ambiguous residue codes. The current scoring model uses a uniform match score
-and mismatch penalty rather than a substitution matrix.
-
-## Repository layout
-
-```text
-include/affine_align.h   Public library API
-src/affine_align.c      Three-state DP and packed traceback
-src/main.c              CLI, FASTA parser, and output formatting
-tests/                  Unit and invariant tests
-docs/algorithm.md       Mathematical formulation and correctness sketch
-examples/pair.fasta     Reproducible example input
-```
-
-The tests include an independent exhaustive-search oracle. For every pair of
-binary-alphabet sequences up to length three under two scoring schemes, the
-dynamic-programming score must equal the best score over all possible
-alignment paths.
+The dynamic-programming matrices require \(O(mn)\) memory for sequences of lengths \(m\) and \(n\). In the current implementation the matrices are allocated on the stack, so the program is intended for short to moderate sequence lengths.
 
 ## License
 
-[MIT](LICENSE)
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
