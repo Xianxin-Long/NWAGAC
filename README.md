@@ -83,12 +83,6 @@ SeqB  1  ATCG  4
 
 The exact date line is generated when the program runs.
 
-## Slides
-
-The course presentation for this project is available here:
-
-[Pairwise Global Alignment Using Affine Gap Penalties](slides.pdf)
-
 ## Notes
 
 The current implementation allocates the three dynamic-programming matrices on the stack. Although the theoretical memory complexity is $O(mn)$, very long input sequences can exceed the available stack size, so the program is intended for short to moderate sequence lengths.
